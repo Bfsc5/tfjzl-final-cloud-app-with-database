@@ -147,29 +147,27 @@ def show_exam_result(request, course_id, submission_id):
     submission = Submission.objects.get(id=submission_id)
     choices = submission.choices.all()
 
-    score = 0
-    total = 0
+    total_score = 0
+    questions = course.question_set.all()
 
-    for question in course.question_set.all():
-        total += question.grade
-        if question.is_get_score(choices):
-            score += question.grade
+    for question in questions:
+        # Correct choices for this question
+        correct_choices = question.choice_set.filter(is_correct=True)
+
+        # User's selected choices for this question
+        selected_choices = choices.filter(question=question)
+
+        # Award points only if the sets match exactly
+        if set(correct_choices) == set(selected_choices):
+            total_score += question.grade
 
     context = {
         'course': course,
         'selected_choices': choices,
-        'grade': score,
-        'total': total
+        'grade': total_score,
+        'total': sum(q.grade for q in questions)
     }
 
     return render(request, 'onlinecourse/exam_result_bootstrap.html', context)
-     # Get all correct choices for the question selected_choices = choices.filter(question=question) # Get the user's selected choices for the question
 
 # Check if the selected choices are the same as the correct choices if set(correct_choices) == set(selected_choices): total_score += question.grade # Add the question's grade only if all correct answers are selected
-
-    context = {
-        'course': course,
-        'selected_choices': choices,
-        'grade': score,
-        'total': total
-    }
