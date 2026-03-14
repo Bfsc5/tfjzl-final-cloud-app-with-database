@@ -38,7 +38,17 @@
             </ul>
         </div>
     </nav>
+{% if user.is_authenticated %}
+Start Exam
 
+{% for question in course.question_set.all %}
+{{ question.content }}
+{% csrf_token %}
+{% for choice in question.choice_set.all %}
+{{ choice.content }}
+{% endfor %}
+{% endfor %} 
+{% endif %}
     <!-- Page content -->
     <div class="container-fluid">
             <h2>{{ course.name }}</h2>
